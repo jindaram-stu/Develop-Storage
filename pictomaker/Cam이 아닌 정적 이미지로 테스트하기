@@ -1,0 +1,43 @@
+# Camera가 아닌 정적 이미지로 Test 하기
+MediaPipe를 통해 개발을 하다보면, 간단한 테스트 확인을 해야할 때도, 카메라를 이용해 테스트 해야하는 경우가 많다. 협소한 공간에서 개발을 하다보면 카메라에 전신을 다 보이기 힘들기도 하고, 매우 매우 귀찮다. 그래서 난 카메라가 아닌 사람의 모습이 그려진 정적인 이미지를 통해 테스트를 하고 싶었다. 
+
+```javascript
+export default function TestPose() {
+    function onResult() {
+        drawing();
+    }
+
+    return (
+        <>
+            <div>
+                <img src={"image-src"} id="test-image"/>
+                <canvas></canvas>
+            </div>
+        </>
+    )
+}
+```
+
+먼저 서비스에 이용할 CamPose 컴포넌트가 아닌, 테스트를 위해 test 디렉토리를 새로 생성하고, TestPose 라는 테스트 컴포넌트를 생성했다.
+위 컴포넌트의 목적은 CamPose 컴포넌트를 대신하여 개발자 입장에서 쉽게 정적인 이미지를 통해 픽토그램을 추출하는 컴포넌트이다.
+
+동작원리는 CamPose와 같지만, video Element가 아닌 image element를 보낸다는 점이 다르다.
+
+다음 코드를 통해 간단하게 image element를 전송할 수 있다.
+
+```javascript
+const imageElement = document.getElementById('test-image');
+
+const pose = new Pose({locateFile : (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+          }})
+
+
+pose.send({image : imageElement});
+```
+
+해당 img 태그의 element를 send() 함수의 파라미터로 담아 보내기만 하면 된다. 해당 코드는 여러번 반복되어 실시간으로 값을 가져오는 것이 아닌 최초에 단 한번만 실행된다. 
+그렇기 때문에 퍼포먼스적 부담없이 기존의 CamPose를 통해 일일이 테스트 하던 환경보다 훨씬 더 빠르게 테스트 할 수 있다.
+
+단, Camera를 통해 모델 인식을 하는 것처럼 실사에 가까운 이미지여야 한다.
+
